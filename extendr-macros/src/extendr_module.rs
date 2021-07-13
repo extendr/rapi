@@ -113,8 +113,8 @@ pub fn extendr_module(item: TokenStream) -> TokenStream {
 
         #[no_mangle]
         #[allow(non_snake_case)]
-        pub extern "C" fn #module_init_name(info: * mut extendr_api::DllInfo) {
-            unsafe { extendr_api::register_call_methods(info, #module_metadata_name()) };
+        pub unsafe extern "C" fn #module_init_name(info: * mut extendr_api::DllInfo) {
+            extendr_api::register_call_methods(info, #module_metadata_name());
         }
     })
 }

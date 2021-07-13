@@ -112,6 +112,8 @@ pub fn extendr_impl(mut item_impl: ItemImpl) -> TokenStream {
         // Function wrappers
         #( #wrappers )*
 
+        //TODO: Implement a version that works for `#self_ty` -- not only reference
+
         // Input conversion function for this type.
         impl<'a> extendr_api::FromRobj<'a> for &#self_ty {
             fn from_robj(robj: &'a Robj) -> std::result::Result<Self, &'static str> {
@@ -161,6 +163,7 @@ pub fn extendr_impl(mut item_impl: ItemImpl) -> TokenStream {
         }
 
         // Function to free memory for this type.
+        #[allow(non_snake_case)]
         extern "C" fn #finalizer_name (sexp: extendr_api::SEXP) {
             unsafe {
                 let robj = extendr_api::new_owned(sexp);
