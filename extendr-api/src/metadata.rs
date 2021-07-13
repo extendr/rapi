@@ -285,7 +285,59 @@ fn write_impl_wrapper(
     // LHS with dollar operator is wrapped in ``, so pass name as is,
     // but in the body `imp_name_fixed` is called as valid R function,
     // so we pass preprocessed value
-    writeln!(w, "`$.{}` <- function (self, name) {{ func <- {}[[name]]; environment(func) <- environment(); func }}\n", imp.name, imp_name_fixed)?;
+    writeln!(
+        w,
+        "
+`$.{class_name}` <- function (self, name) {{
+  method <- get0(name, {impl_name})
+  if (!is.null(method)) {{
+    environment(method) <- environment()
+    method
+  }} else {{
+    getter <- get0(paste0(\"get_\", name), {impl_name})
+    if (!is.null(getter)) {{
+      environment(getter) <- environment()
+      getter()
+    }} else {{
+      stop(
+        paste(
+          \"Class member not found.\",
+          paste0(\"x No method `\", name, \"` found in `{impl_name}`.\"),
+          paste0(\"x No getter `get_\", name, \"` found in `{impl_name}`.\"),
+          sep = \"\\n\"
+        ),
+        call. = FALSE
+      )
+    }}
+  }}
+}}",
+        class_name = imp.name,
+        impl_name = imp_name_fixed
+    )?;
+
+    writeln!(
+        w,
+        "
+`$<-.{class_name}` <- function (self, name, value) {{
+  setter <- get0(paste0(\"set_\", name), {impl_name})
+  if (!is.null(setter)) {{
+      environment(setter) <- environment()
+      setter(value)
+      self
+  }} else {{
+      stop(
+      paste(
+          \"Class member not found.\",
+          paste0(\"x No setter `set_\", name, \"` found in `{impl_name}`.\"),
+          sep = \"\\n\"
+      ),
+      call. = FALSE
+      )
+  }}
+}}",
+        class_name = imp.name,
+        impl_name = imp_name_fixed
+    )?;
 
     Ok(())
 }

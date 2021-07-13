@@ -74,9 +74,9 @@ struct MyClass {
 /// Class for testing (exported)
 /// @examples
 /// x <- MyClass$new()
-/// x$a()
+/// x$get_a()
 /// x$set_a(10)
-/// x$a()
+/// x$get_a()
 /// @export
 #[extendr]
 impl MyClass {
@@ -92,7 +92,7 @@ impl MyClass {
     }
     
     /// Method for getting stuff.
-    fn a(&self) -> i32 {
+    fn get_a(&self) -> i32 {
         self.a
     }
     
@@ -135,7 +135,7 @@ impl MyClassUnexported {
     }
     
     /// Method for getting stuff.
-    fn a(&self) -> i32 {
+    fn get_a(&self) -> i32 {
         self.a
     }
 }

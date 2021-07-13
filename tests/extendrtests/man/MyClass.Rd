@@ -16,8 +16,8 @@ Class for testing (exported)
 }
 \examples{
 x <- MyClass$new()
-x$a()
+x$get_a()
 x$set_a(10)
-x$a()
+x$get_a()
 }
 \keyword{datasets}

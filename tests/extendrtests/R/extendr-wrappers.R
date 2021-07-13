@@ -60,9 +60,9 @@ hello_submodule <- function() .Call(wrap__hello_submodule)
 #' Class for testing (exported)
 #' @examples
 #' x <- MyClass$new()
-#' x$a()
+#' x$get_a()
 #' x$set_a(10)
-#' x$a()
+#' x$get_a()
 #' @export
 MyClass <- new.env(parent = emptyenv())
 
@@ -70,15 +70,55 @@ MyClass$new <- function() .Call(wrap__MyClass__new)
 
 MyClass$set_a <- function(x) invisible(.Call(wrap__MyClass__set_a, self, x))
 
-MyClass$a <- function() .Call(wrap__MyClass__a, self)
+MyClass$get_a <- function() .Call(wrap__MyClass__get_a, self)
 
 MyClass$me <- function() .Call(wrap__MyClass__me, self)
 
 #' @rdname MyClass
 #' @usage NULL
 #' @export
-`$.MyClass` <- function (self, name) { func <- MyClass[[name]]; environment(func) <- environment(); func }
 
+`$.MyClass` <- function (self, name) {
+  method <- get0(name, MyClass)
+  if (!is.null(method)) {
+    environment(method) <- environment()
+    method
+  } else {
+    getter <- get0(paste0("get_", name), MyClass)
+    if (!is.null(getter)) {
+      environment(getter) <- environment()
+      getter()
+    } else {
+      stop(
+        paste(
+          "Class member not found.",
+          paste0("x No method `", name, "` found in `MyClass`."),
+          paste0("x No getter `get_", name, "` found in `MyClass`."),
+          sep = "\n"
+        ),
+        call. = FALSE
+      )
+    }
+  }
+}
+
+`$<-.MyClass` <- function (self, name, value) {
+  setter <- get0(paste0("set_", name), MyClass)
+  if (!is.null(setter)) {
+      environment(setter) <- environment()
+      setter(value)
+      self
+  } else {
+      stop(
+      paste(
+          "Class member not found.",
+          paste0("x No setter `set_", name, "` found in `MyClass`."),
+          sep = "\n"
+      ),
+      call. = FALSE
+      )
+  }
+}
 `__MyClass` <- new.env(parent = emptyenv())
 
 `__MyClass`$new <- function() .Call(wrap____MyClass__new)
@@ -86,18 +126,98 @@ MyClass$me <- function() .Call(wrap__MyClass__me, self)
 `__MyClass`$`__name_test` <- function() invisible(.Call(wrap____MyClass____name_test, self))
 
 #' @export
-`$.__MyClass` <- function (self, name) { func <- `__MyClass`[[name]]; environment(func) <- environment(); func }
 
+`$.__MyClass` <- function (self, name) {
+  method <- get0(name, `__MyClass`)
+  if (!is.null(method)) {
+    environment(method) <- environment()
+    method
+  } else {
+    getter <- get0(paste0("get_", name), `__MyClass`)
+    if (!is.null(getter)) {
+      environment(getter) <- environment()
+      getter()
+    } else {
+      stop(
+        paste(
+          "Class member not found.",
+          paste0("x No method `", name, "` found in ``__MyClass``."),
+          paste0("x No getter `get_", name, "` found in ``__MyClass``."),
+          sep = "\n"
+        ),
+        call. = FALSE
+      )
+    }
+  }
+}
+
+`$<-.__MyClass` <- function (self, name, value) {
+  setter <- get0(paste0("set_", name), `__MyClass`)
+  if (!is.null(setter)) {
+      environment(setter) <- environment()
+      setter(value)
+      self
+  } else {
+      stop(
+      paste(
+          "Class member not found.",
+          paste0("x No setter `set_", name, "` found in ``__MyClass``."),
+          sep = "\n"
+      ),
+      call. = FALSE
+      )
+  }
+}
 #' Class for testing (unexported)
 MyClassUnexported <- new.env(parent = emptyenv())
 
 MyClassUnexported$new <- function() .Call(wrap__MyClassUnexported__new)
 
-MyClassUnexported$a <- function() .Call(wrap__MyClassUnexported__a, self)
+MyClassUnexported$get_a <- function() .Call(wrap__MyClassUnexported__get_a, self)
 
 #' @export
-`$.MyClassUnexported` <- function (self, name) { func <- MyClassUnexported[[name]]; environment(func) <- environment(); func }
 
+`$.MyClassUnexported` <- function (self, name) {
+  method <- get0(name, MyClassUnexported)
+  if (!is.null(method)) {
+    environment(method) <- environment()
+    method
+  } else {
+    getter <- get0(paste0("get_", name), MyClassUnexported)
+    if (!is.null(getter)) {
+      environment(getter) <- environment()
+      getter()
+    } else {
+      stop(
+        paste(
+          "Class member not found.",
+          paste0("x No method `", name, "` found in `MyClassUnexported`."),
+          paste0("x No getter `get_", name, "` found in `MyClassUnexported`."),
+          sep = "\n"
+        ),
+        call. = FALSE
+      )
+    }
+  }
+}
+
+`$<-.MyClassUnexported` <- function (self, name, value) {
+  setter <- get0(paste0("set_", name), MyClassUnexported)
+  if (!is.null(setter)) {
+      environment(setter) <- environment()
+      setter(value)
+      self
+  } else {
+      stop(
+      paste(
+          "Class member not found.",
+          paste0("x No setter `set_", name, "` found in `MyClassUnexported`."),
+          sep = "\n"
+      ),
+      call. = FALSE
+      )
+  }
+}
 #' Class for testing (exported)
 #' @examples
 #' x <- MySubmoduleClass$new()
@@ -118,5 +238,45 @@ MySubmoduleClass$me <- function() .Call(wrap__MySubmoduleClass__me, self)
 #' @rdname MySubmoduleClass
 #' @usage NULL
 #' @export
-`$.MySubmoduleClass` <- function (self, name) { func <- MySubmoduleClass[[name]]; environment(func) <- environment(); func }
 
+`$.MySubmoduleClass` <- function (self, name) {
+  method <- get0(name, MySubmoduleClass)
+  if (!is.null(method)) {
+    environment(method) <- environment()
+    method
+  } else {
+    getter <- get0(paste0("get_", name), MySubmoduleClass)
+    if (!is.null(getter)) {
+      environment(getter) <- environment()
+      getter()
+    } else {
+      stop(
+        paste(
+          "Class member not found.",
+          paste0("x No method `", name, "` found in `MySubmoduleClass`."),
+          paste0("x No getter `get_", name, "` found in `MySubmoduleClass`."),
+          sep = "\n"
+        ),
+        call. = FALSE
+      )
+    }
+  }
+}
+
+`$<-.MySubmoduleClass` <- function (self, name, value) {
+  setter <- get0(paste0("set_", name), MySubmoduleClass)
+  if (!is.null(setter)) {
+      environment(setter) <- environment()
+      setter(value)
+      self
+  } else {
+      stop(
+      paste(
+          "Class member not found.",
+          paste0("x No setter `set_", name, "` found in `MySubmoduleClass`."),
+          sep = "\n"
+      ),
+      call. = FALSE
+      )
+  }
+}
